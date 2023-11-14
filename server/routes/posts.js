@@ -1,5 +1,13 @@
 import express from "express";
-import { getFeedPosts, getUserPosts, likePost, addComment, updatePost, deletePost, getPost } from "../controllers/posts.js";
+import {
+  getFeedPosts,
+  getUserPosts,
+  likePost,
+  deletePost,
+  getPost,
+  getReviewsForPost,
+  createReview,
+} from "../controllers/posts.js";
 import { verifyToken } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -9,14 +17,16 @@ router.get("/", verifyToken, getFeedPosts);
 router.get("/:_id", verifyToken, getPost);
 router.get("/:userId/posts", verifyToken, getUserPosts);
 
+// GET reviews for a specific post
+router.get("/:postId/reviews", verifyToken, getReviewsForPost);
+
 /* UPDATE */
 router.patch("/:id/like", verifyToken, likePost);
-router.patch("/:id", verifyToken, updatePost);
 
 /* DELETE */
 router.delete("/:id", verifyToken, deletePost);
 
-/* CREATE */
-router.post("/:postId/comment", verifyToken, addComment);
+// POST a new review
+router.post("/addReview", verifyToken, createReview);
 
 export default router;

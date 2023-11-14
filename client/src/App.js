@@ -21,6 +21,7 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Routes>
+          <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/home" element={isAuth ? <HomePage /> : <Navigate to="/login" />} />
           <Route path="/home/anime" element={isAuth ? <AnimeHomePage /> : <Navigate to="/login" />} />

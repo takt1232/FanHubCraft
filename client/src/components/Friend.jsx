@@ -10,7 +10,7 @@ import UserImage from "./UserImage";
 import YesNoDialogMessage from "./YesNoDialogMessage";
 import { useState } from "react";
 
-const Friend = ({ friendId, name, subtitle, userPicturePath, postId }) => {
+const Friend = ({ friendId, name, subtitle, userPicturePath, postId, status='view' }) => {
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [dialogAction, setDialogAction] = useState(null);
   const dispatch = useDispatch();
@@ -126,7 +126,7 @@ const Friend = ({ friendId, name, subtitle, userPicturePath, postId }) => {
           )}
         </IconButton>
       )}
-      {friendId === _id && (
+      {friendId === _id && status === 'post' && (
         <FlexBetween gap="0.5rem">
           <IconButton fontSize="5px" onClick={() => handleConfirmDialogOpen("edit")} sx={{ backgroundColor: primaryLight, p: "0.6rem" }}>
               <EditIcon sx={{ color: "green" }}/>

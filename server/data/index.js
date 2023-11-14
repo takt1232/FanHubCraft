@@ -11,6 +11,12 @@ const userIds = [
   new mongoose.Types.ObjectId(),
 ];
 
+const postIds = [
+  new mongoose.Types.ObjectId(),
+  new mongoose.Types.ObjectId(),
+  new mongoose.Types.ObjectId(),
+];
+
 export const users = [
   {
     _id: userIds[0],
@@ -144,7 +150,7 @@ export const users = [
 
 export const posts = [
   {
-    _id: new mongoose.Types.ObjectId(),
+    _id: postIds[0],
     userId: userIds[1],
     firstName: "Steve",
     lastName: "Ralph",
@@ -163,10 +169,10 @@ export const posts = [
       { userId: userIds[2], commentText: "another random comment" },
       { userId: userIds[1], commentText: "yet another random comment" },
     ],
-    tags: "anime", 
+    tags: "anime",
   },
   {
-    _id: new mongoose.Types.ObjectId(),
+    _id: postIds[1],
     userId: userIds[3],
     firstName: "Whatcha",
     lastName: "Doing",
@@ -187,10 +193,10 @@ export const posts = [
       { userId: userIds[1], commentText: "no more random comments" },
       { userId: userIds[6], commentText: "I lied, one more random comment" },
     ],
-    tags: "game", 
+    tags: "game",
   },
   {
-    _id: new mongoose.Types.ObjectId(),
+    _id: postIds[2],
     userId: userIds[4],
     firstName: "Jane",
     lastName: "Doe",
@@ -208,10 +214,37 @@ export const posts = [
     comments: [
       { userId: userIds[1], commentText: "one more random comment" },
       { userId: userIds[6], commentText: "I lied, one more random comment" },
-      { userId: userIds[3], commentText: "I lied again, one more random comment" },
+      {
+        userId: userIds[3],
+        commentText: "I lied again, one more random comment",
+      },
       { userId: userIds[5], commentText: "Why am I doing this?" },
       { userId: userIds[7], commentText: "I'm bored" },
     ],
-    tags: "game", 
+    tags: "game",
+  },
+];
+
+export const reviews = [
+  {
+    _id: new mongoose.Types.ObjectId(),
+    userId: userIds[1],
+    rating: 5,
+    comment: "Rating system test",
+    postId: postIds[0],
+  },
+  {
+    _id: new mongoose.Types.ObjectId(),
+    userId: userIds[2],
+    rating: 4,
+    comment: "Another Comment",
+    postId: postIds[0],
+  },
+  {
+    _id: new mongoose.Types.ObjectId(),
+    userId: userIds[3],
+    rating: 5,
+    comment: "Another Comment!!!",
+    postId: postIds[0],
   },
 ];
