@@ -155,23 +155,18 @@ export const getReviewsForPost = async (req, res) => {
 /* CREATE a new review */
 export const createReview = async (req, res) => {
   const { userId, rating, comment, postId } = req.body;
-  console.log("user", userId);
   console.log(rating);
-  console.log(comment);
-  console.log(postId);
 
   try {
     // Check if the user exists
     const userExists = await User.findById(userId);
     if (!userExists) {
-      console.log("user");
       return res.status(404).json({ message: "User not found" });
     }
 
     // Check if the post exists
     const postExists = await Post.findById(postId);
     if (!postExists) {
-      console.log("post");
       return res.status(404).json({ message: "Post not found" });
     }
 

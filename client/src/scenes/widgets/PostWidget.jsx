@@ -16,13 +16,16 @@ import {
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import DialogMessage from "components/DialogMessage";
+
 import Friend from "components/Friend";
 import FlexBetween from "components/FlexBetween";
 import WidgetWrapper from "components/WidgetWrapper";
+import UserImage from "components/UserImage";
+
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state";
-import UserImage from "components/UserImage";
 import { useNavigate } from "react-router-dom";
 
 const PostWidget = ({
@@ -51,6 +54,13 @@ const PostWidget = ({
   const { palette } = useTheme();
   const main = palette.neutral.main;
   const primary = palette.primary.main;
+
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [openMissingBothDialog, setOpenMissingBothDialog] = useState(false);
+  const [openMissingRateDialog, setOpenMissingRateDialog] = useState(false);
+  const [openMissingCommentDialog, setOpenMissingCommentDialog] =
+    useState(false);
 
   const patchLike = async () => {
     const response = await fetch(`http://localhost:3001/posts/${postId}/like`, {
@@ -116,7 +126,7 @@ const PostWidget = ({
         body: JSON.stringify({
           userId: loggedInUserId,
           comment: comment,
-          rating: 5,
+          rating: rate,
           postId: postId,
         }),
       });
@@ -140,156 +150,253 @@ const PostWidget = ({
     }
   };
 
+  const renderStars = (rating) => {
+    const maxRating = 5;
+    const fullStars = Math.floor(rating);
+
+    const starIcons = [];
+
+    for (let i = 0; i < fullStars; i++) {
+      starIcons.push(<StarIcon key={`star-${i}`} fontSize="1rem" />);
+    }
+
+    const remainingStars = maxRating - Math.ceil(rating);
+    for (let i = 0; i < remainingStars; i++) {
+      starIcons.push(
+        <StarBorderIcon key={`border-star-${i}`} fontSize="1rem" />
+      );
+    }
+
+    return starIcons;
+  };
+
+  const handleStarClick = (value) => {
+    setRating(value);
+  };
+
+  const handleCommentChange = (e) => {
+    setComment(e.target.value);
+  };
+
+  const renderRateStars = () => {
+    const maxRating = 5;
+    const starIcons = [];
+
+    for (let i = 1; i <= maxRating; i++) {
+      starIcons.push(
+        i <= rating ? (
+          <StarIcon key={`star-${i}`} onClick={() => handleStarClick(i)} />
+        ) : (
+          <StarBorderIcon
+            key={`star-${i}`}
+            onClick={() => handleStarClick(i)}
+          />
+        )
+      );
+    }
+
+    return starIcons;
+  };
+
+  const handleEnterKeyPress = (e) => {
+    if (e.key === "Enter") {
+      reviewValidation();
+    }
+  };
+
+  const reviewValidation = () => {
+    if (rating === 0 && comment === "") {
+      setOpenMissingBothDialog(true); // Open dialog if both rating and comment are empty
+    } else if (rating === 0) {
+      setOpenMissingRateDialog(true); // Open dialog if rating is not selected
+    } else if (comment.length === 0) {
+      setOpenMissingCommentDialog(true); // Open dialog if comment is empty
+    } else {
+      addReview(comment, rating);
+      setRating(0);
+      setComment("");
+    }
+  };
+
+  const handleCloseDialog = () => {
+    setOpenMissingBothDialog(false);
+    setOpenMissingRateDialog(false);
+    setOpenMissingCommentDialog(false);
+  };
+
   useEffect(() => {
     getReviewForPost(postId);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <WidgetWrapper m="2rem 0">
-      <Friend
-        friendId={postUserId}
-        name={name}
-        subtitle={location}
-        userPicturePath={userPicturePath}
-        postId={postId}
-        status="post"
-      />
-      <Typography color={main} sx={{ mt: "1rem" }}>
-        {description}
-      </Typography>
-      {tags && (
-        <Box display="flex" flexDirection="row" gap="0.5rem" mt="0.5rem">
-          {tags.map((tag, i) => (
-            <Typography color={primary} key={i}>
-              #{tag}
-            </Typography>
-          ))}
-        </Box>
-      )}
-      {postPicturePath && (
-        <img
-          width="100%"
-          height="auto"
-          alt="post"
-          style={{ borderRadius: "0.75rem", marginTop: "0.75rem" }}
-          src={`http://localhost:3001/assets/${postPicturePath}`}
+    <>
+      <WidgetWrapper m="2rem 0">
+        <Friend
+          friendId={postUserId}
+          name={name}
+          subtitle={location}
+          userPicturePath={userPicturePath}
+          postId={postId}
+          status="post"
         />
-      )}
-      <FlexBetween mt="0.25rem">
-        <FlexBetween gap="1rem">
-          <FlexBetween gap="0.3rem">
-            <IconButton onClick={patchLike}>
-              {isLiked ? (
-                <FavoriteOutlined sx={{ color: primary }} />
-              ) : (
-                <FavoriteBorderOutlined />
-              )}
-            </IconButton>
-            <Typography>{likeCount}</Typography>
+        <Typography color={main} sx={{ mt: "1rem" }}>
+          {description}
+        </Typography>
+        {tags && (
+          <Box display="flex" flexDirection="row" gap="0.5rem" mt="0.5rem">
+            {tags.map((tag, i) => (
+              <Typography color={primary} key={i}>
+                #{tag}
+              </Typography>
+            ))}
+          </Box>
+        )}
+        {postPicturePath && (
+          <img
+            width="100%"
+            height="auto"
+            alt="post"
+            style={{ borderRadius: "0.75rem", marginTop: "0.75rem" }}
+            src={`http://localhost:3001/assets/${postPicturePath}`}
+          />
+        )}
+        <FlexBetween mt="0.25rem">
+          <FlexBetween gap="1rem">
+            <FlexBetween gap="0.3rem">
+              <IconButton onClick={patchLike}>
+                {isLiked ? (
+                  <FavoriteOutlined sx={{ color: primary }} />
+                ) : (
+                  <FavoriteBorderOutlined />
+                )}
+              </IconButton>
+              <Typography>{likeCount}</Typography>
+            </FlexBetween>
+
+            <FlexBetween gap="0.3rem">
+              <IconButton onClick={handleToggleComments}>
+                <ChatBubbleOutlineOutlined />
+              </IconButton>
+              <Typography>{reviewUsers.length}</Typography>
+            </FlexBetween>
           </FlexBetween>
 
-          <FlexBetween gap="0.3rem">
-            <IconButton onClick={handleToggleComments}>
-              <ChatBubbleOutlineOutlined />
-            </IconButton>
-            <Typography>{reviewUsers.length}</Typography>
-          </FlexBetween>
+          <IconButton>
+            <ShareOutlined />
+          </IconButton>
         </FlexBetween>
-
-        <IconButton>
-          <ShareOutlined />
-        </IconButton>
-      </FlexBetween>
-      {isComments && (
-        <Box mt="0.5rem">
-          {reviewUsers.map((review, i) => (
-            <Box key={`${review}-${i}`}>
-              <Divider />
-              <FlexBetween paddingTop="1rem">
-                <FlexBetween>
-                  {review.userId ? (
-                    review.picturePath ? (
-                      <UserImage image={review.picturePath} size="35px" />
+        {isComments && reviewUsers.length >= 0 && (
+          <Box mt="0.5rem">
+            {reviewUsers.map((review, i) => (
+              <Box key={`${review}-${i}`}>
+                <Divider />
+                <FlexBetween paddingTop="1rem">
+                  <FlexBetween>
+                    {review.userId ? (
+                      review.picturePath ? (
+                        <UserImage image={review.picturePath} size="35px" />
+                      ) : (
+                        <UserImage image="" size="35px" />
+                      )
                     ) : (
-                      <UserImage image="" size="35px" />
-                    )
-                  ) : (
-                    <HourglassEmptyIcon />
-                  )}
-                  <Box>
-                    <FlexBetween width="200px" height="100%">
-                      <Box
-                        onClick={() => {
-                          navigate(`/profile/${review.userId}`);
-                          navigate(0);
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            color: primary,
-                            m: "0.5rem 0",
-                            pl: "1rem",
-                            "&:hover": {
-                              color: palette.primary.light,
-                              cursor: "pointer",
-                            },
-                          }}
-                        >
-                          {review.userId && review.name}
+                      <HourglassEmptyIcon />
+                    )}
+                    <Box>
+                      <FlexBetween width="100%" height="100%">
+                        <Box display="flex" flexDirection="row">
+                          <Typography
+                            sx={{
+                              color: "grey",
+                              m: "0.5rem 0",
+                              pl: "1rem",
+                            }}
+                          >
+                            Review by
+                          </Typography>
+                          <Typography
+                            sx={{
+                              color: primary,
+                              m: "0.5rem 0",
+                              pl: "1rem",
+                              "&:hover": {
+                                color: palette.secondary.light,
+                                cursor: "pointer",
+                              },
+                            }}
+                            onClick={() => {
+                              navigate(`/profile/${review.userId}`);
+                              navigate(0);
+                            }}
+                          >
+                            {review.userId && review.name}
+                          </Typography>
+                        </Box>
+                        <Box marginLeft="2rem">
+                          {renderStars(review.rating).map((star, index) => (
+                            <span key={index}>{star}</span>
+                          ))}
+                        </Box>
+                      </FlexBetween>
+                      <Box>
+                        <Typography sx={{ color: main, pl: "1rem" }}>
+                          {review.comment}
                         </Typography>
                       </Box>
-                      <Box>
-                        <StarIcon mt="1rem" />
-                        <StarBorderIcon />
-                      </Box>
-                    </FlexBetween>
-                    <Box>
-                      <Typography sx={{ color: main, pl: "1rem" }}>
-                        {review.comment}
-                      </Typography>
-                      <Typography></Typography>
                     </Box>
-                  </Box>
+                  </FlexBetween>
                 </FlexBetween>
+                <Divider />
+              </Box>
+            ))}
+            <FlexBetween gap="1rem" paddingTop="1rem">
+              <FlexBetween width="100%" gap="1rem">
+                <UserImage image={loggedInUserPicturePath} size="35px" />
+                <TextField
+                  fullWidth
+                  id="standard-basic"
+                  variant="standard"
+                  placeholder="Comment"
+                  value={comment}
+                  onChange={handleCommentChange}
+                  onKeyUp={handleEnterKeyPress}
+                />
               </FlexBetween>
-              <Divider />
-            </Box>
-          ))}
-          <FlexBetween gap="1rem" paddingTop="1rem">
-            <FlexBetween width="100%" gap="1rem">
-              <UserImage image={loggedInUserPicturePath} size="35px" />
-              <TextField
-                fullWidth
-                id="standard-basic"
-                variant="standard"
-                placeholder="Comment"
-                onKeyUp={(e) => {
-                  if (e.key === "Enter") {
-                    addReview(e.target.value);
-                    e.target.value = "";
-                  }
+              <Box width="9rem">{renderRateStars()}</Box>
+              <SendIcon
+                sx={{
+                  color: primary,
+                  "&:hover": {
+                    color: palette.primary.light,
+                    cursor: "pointer",
+                  },
+                }}
+                onClick={() => {
+                  reviewValidation();
                 }}
               />
             </FlexBetween>
-            <SendIcon
-              sx={{
-                color: primary,
-                "&:hover": { color: palette.primary.light, cursor: "pointer" },
-              }}
-              onClick={() => {
-                const commentInput = document.getElementById("standard-basic");
-                const commentValue = commentInput.value;
-
-                addReview(commentValue, 5);
-                commentInput.value = "";
-                // You can also set focus back to the input if desired
-                commentInput.focus();
-              }}
-            />
-          </FlexBetween>
-        </Box>
-      )}
-    </WidgetWrapper>
+          </Box>
+        )}
+      </WidgetWrapper>
+      <DialogMessage
+        open={openMissingBothDialog}
+        handleClose={handleCloseDialog}
+        title="Rate and Comment"
+        content="Please add a rate and comment"
+      />
+      <DialogMessage
+        open={openMissingRateDialog}
+        handleClose={handleCloseDialog}
+        title="Rate"
+        content="Please add a rate"
+      />
+      <DialogMessage
+        open={openMissingCommentDialog}
+        handleClose={handleCloseDialog}
+        title="Comment"
+        content="Please add a comment"
+      />
+    </>
   );
 };
 
