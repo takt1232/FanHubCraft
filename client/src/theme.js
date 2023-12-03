@@ -27,6 +27,19 @@ export const colorTokens = {
     800: "#00353F",
     900: "#001519",
   },
+  orange: {
+    // Adding shades of orange
+    50: "#FFF6E0",
+    100: "#FFE0B2",
+    200: "#FFCC80",
+    300: "#FFB74D",
+    400: "#FFA726",
+    500: "#FF9800",
+    600: "#F57C00",
+    700: "#EF6C00",
+    800: "#E65100",
+    900: "#D84300",
+  },
 };
 
 // mui theme settings
@@ -38,9 +51,9 @@ export const themeSettings = (mode) => {
         ? {
             // palette values for dark mode
             primary: {
-              dark: colorTokens.primary[200],
-              main: colorTokens.primary[500],
-              light: colorTokens.primary[800],
+              dark: colorTokens.orange[200],
+              main: colorTokens.orange[500],
+              light: colorTokens.orange[800],
             },
             neutral: {
               dark: colorTokens.grey[100],
@@ -57,9 +70,9 @@ export const themeSettings = (mode) => {
         : {
             // palette values for light mode
             primary: {
-              dark: colorTokens.primary[700],
-              main: colorTokens.primary[500],
-              light: colorTokens.primary[50],
+              dark: colorTokens.orange[700],
+              main: colorTokens.orange[500],
+              light: colorTokens.orange[50],
             },
             neutral: {
               dark: colorTokens.grey[700],

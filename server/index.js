@@ -11,12 +11,15 @@ import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
 import postRoutes from "./routes/posts.js";
+import statsRoutes from "./routes/stats.js";
 import { register } from "./controllers/auth.js";
 import { createPost, updatePost } from "./controllers/posts.js";
 import { verifyToken } from "./middleware/auth.js";
 import User from "./models/User.js";
 import Post from "./models/Post.js";
 import { users, posts, reviews } from "./data/index.js";
+import { uploadImage } from "./controllers/image.js";
+import { updateUserProfile } from "./controllers/users.js";
 
 /* CONFIGURATIONS */
 const __filename = fileURLToPath(import.meta.url);
@@ -52,11 +55,19 @@ app.patch(
   upload.single("picture"),
   updatePost
 );
+app.patch(
+  "/users/:id/update",
+  verifyToken,
+  upload.single("picture"),
+  updateUserProfile
+);
+app.post("/upload/image", verifyToken, upload.single("picture"), uploadImage);
 
 /* ROUTES */
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/posts", postRoutes);
+app.use("/stats", statsRoutes);
 
 /* MONGOOSE SETUP */
 const PORT = process.env.PORT || 6001;
@@ -66,7 +77,7 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
+    app.listen(PORT, "0.0.0.0", () => console.log(`Server Port: ${PORT}`));
 
     /* ADD DATA ONE TIME */
     //User.insertMany(users);

@@ -9,13 +9,19 @@ import { createTheme } from "@mui/material";
 import { themeSettings } from "theme";
 import AnimeHomePage from "scenes/animePage";
 import GameHomePage from "scenes/gamePage";
-import EditPost from "scenes/editPostPage.jsx";
 import EditProfilePage from "scenes/editProfilePage";
+import AdminLoginPage from "scenes/admin/adminLoginPage";
+import AdminHomePage from "scenes/admin/adminHomePage";
+import ManageUserPage from "scenes/admin/manageUser.jsx";
+import ManagePostsPage from "scenes/admin/managePostPage";
+import AdminViewPostPage from "scenes/admin/viewPostPage.jsx";
+import ProtectedRoute from "ProtectedRoutes";
 
 function App() {
   const mode = useSelector((state) => state.mode);
   const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
   const isAuth = Boolean(useSelector((state) => state.token));
+  const role = useSelector((state) => state.role);
 
   return (
     <div className="app">
@@ -44,14 +50,20 @@ function App() {
 
             <Route
               path="/profile/manage/:userId"
-              element={
-                isAuth ? <ProfilePage /> : <EditProfilePage to="/login" />
-              }
+              element={isAuth ? <EditProfilePage /> : <Navigate to="/login" />}
             />
-            <Route
-              path="/post/:postId/:userPicturePath"
-              element={isAuth ? <EditPost /> : <Navigate to="/login" />}
-            />
+
+            {/*Admin Routes */}
+            <Route path="/admin" element={<AdminLoginPage />} />
+            <Route element={<ProtectedRoute role={role} isAuth={isAuth} />}>
+              <Route path="/admin/home" element={<AdminHomePage />} />
+              <Route path="/admin/manage/users" element={<ManageUserPage />} />
+              <Route path="/admin/manage/posts" element={<ManagePostsPage />} />
+              <Route
+                path="/admin/view/post/:postId"
+                element={<AdminViewPostPage />}
+              />
+            </Route>
           </Routes>
         </ThemeProvider>
       </BrowserRouter>

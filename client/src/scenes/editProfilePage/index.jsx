@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 import { Box, useMediaQuery } from "@mui/material";
 import NavBar from "scenes/navbar";
 import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
+import EditProfileForm from "./Form";
 
 const EditProfilePage = () => {
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px");
@@ -23,7 +25,12 @@ const EditProfilePage = () => {
     };
   }, [isNonMobileScreens]);
 
-  return <>Manage Profile</>;
+  return (
+    <Box>
+      <NavBar></NavBar>
+      <EditProfileForm />
+    </Box>
+  );
 };
 
 export default EditProfilePage;

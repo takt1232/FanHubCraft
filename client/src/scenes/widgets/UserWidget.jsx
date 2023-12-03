@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 
 const UserWidget = ({ userId, picturePath }) => {
   const [user, setUser] = useState(null);
+  const id = useSelector((state) => state.user._id);
   const { palette } = useTheme();
   const navigate = useNavigate();
   const token = useSelector((state) => state.token);
@@ -62,15 +63,17 @@ const UserWidget = ({ userId, picturePath }) => {
             </Typography>
           </Box>
         </FlexBetween>
-        <ManageAccountsOutlined
-          onClick={() => navigate(`/profile/manage/${userId}`)}
-          sx={{
-            "&:hover": {
-              color: palette.secondary.light,
-              cursor: "pointer",
-            },
-          }}
-        />
+        {userId === id && (
+          <ManageAccountsOutlined
+            onClick={() => navigate(`/profile/manage/${userId}`)}
+            sx={{
+              "&:hover": {
+                color: palette.secondary.light,
+                cursor: "pointer",
+              },
+            }}
+          />
+        )}
       </FlexBetween>
 
       <Divider />
