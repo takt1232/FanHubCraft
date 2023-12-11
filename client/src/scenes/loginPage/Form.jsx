@@ -26,7 +26,6 @@ const registerSchema = yup.object().shape({
   email: yup.string().email("invalid email").required("required"),
   password: yup.string().required("required"),
   location: yup.string().required("required"),
-  occupation: yup.string().required("required"),
   picture: yup.string().required("required"),
 });
 
@@ -41,7 +40,6 @@ const initialValuesRegister = {
   email: "",
   password: "",
   location: "",
-  occupation: "",
   picture: "",
 };
 
@@ -59,9 +57,14 @@ const Form = () => {
   const isLogin = pageType === "login";
   const isRegister = pageType === "register";
 
+  const [loginError, setLoginError] = useState("");
+  const [registerError, setRegisterError] = useState("");
+
   const [ban, setBan] = useState();
   const handleClose = () => {
     setBan("");
+    setLoginError("");
+    setRegisterError("");
   };
 
   const register = async (values, onSubmitProps) => {
@@ -80,10 +83,13 @@ const Form = () => {
       }
     );
     const savedUser = await savedUserResponse.json();
-    onSubmitProps.resetForm();
-
-    if (savedUser) {
+    if (
+      savedUser.msg === "Email already exists. Please use a different email."
+    ) {
+      setRegisterError(savedUser.msg);
+    } else if (savedUser) {
       setPageType("login");
+      onSubmitProps.resetForm();
     }
   };
 
@@ -104,6 +110,10 @@ const Form = () => {
       };
 
       setBan(banDetails);
+    } else if (loggedIn.msg === "User does not exist.") {
+      setLoginError(loggedIn.msg);
+    } else if (loggedIn.msg === "Invalid credentials") {
+      setLoginError(loggedIn.msg);
     } else {
       onSubmitProps.resetForm();
       if (loggedIn) {
@@ -188,51 +198,6 @@ const Form = () => {
                     helperText={touched.location && errors.location}
                     sx={{ gridColumn: "span 4" }}
                   />
-                  <TextField
-                    label="Occupation"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.occupation}
-                    name="occupation"
-                    error={
-                      Boolean(touched.occupation) && Boolean(errors.occupation)
-                    }
-                    helperText={touched.occupation && errors.occupation}
-                    sx={{ gridColumn: "span 4" }}
-                  />
-                  <Box
-                    gridColumn="span 4"
-                    border={`1px solid ${palette.neutral.medium}`}
-                    borderRadius="5px"
-                    p="1rem"
-                  >
-                    <Dropzone
-                      acceptedFiles=".jpg,.jpeg,.png"
-                      multiple={false}
-                      onDrop={(acceptedFiles) =>
-                        setFieldValue("picture", acceptedFiles[0])
-                      }
-                    >
-                      {({ getRootProps, getInputProps }) => (
-                        <Box
-                          {...getRootProps()}
-                          border={`2px dashed ${palette.primary.main}`}
-                          p="1rem"
-                          sx={{ "&:hover": { cursor: "pointer" } }}
-                        >
-                          <input {...getInputProps()} />
-                          {!values.picture ? (
-                            <p>Add Picture Here</p>
-                          ) : (
-                            <FlexBetween>
-                              <Typography>{values.picture.name}</Typography>
-                              <EditOutlinedIcon />
-                            </FlexBetween>
-                          )}
-                        </Box>
-                      )}
-                    </Dropzone>
-                  </Box>
                 </>
               )}
 
@@ -258,6 +223,43 @@ const Form = () => {
                 sx={{ gridColumn: "span 4" }}
               />
             </Box>
+
+            {isRegister && (
+              <Box
+                gridColumn="span 4"
+                border={`1px solid ${palette.neutral.medium}`}
+                borderRadius="5px"
+                p="1rem"
+                mt="2rem"
+              >
+                <Dropzone
+                  acceptedFiles=".jpg,.jpeg,.png"
+                  multiple={false}
+                  onDrop={(acceptedFiles) =>
+                    setFieldValue("picture", acceptedFiles[0])
+                  }
+                >
+                  {({ getRootProps, getInputProps }) => (
+                    <Box
+                      {...getRootProps()}
+                      border={`2px dashed ${palette.primary.main}`}
+                      p="1rem"
+                      sx={{ "&:hover": { cursor: "pointer" } }}
+                    >
+                      <input {...getInputProps()} />
+                      {!values.picture ? (
+                        <p>Add Picture Here</p>
+                      ) : (
+                        <FlexBetween>
+                          <Typography>{values.picture.name}</Typography>
+                          <EditOutlinedIcon />
+                        </FlexBetween>
+                      )}
+                    </Box>
+                  )}
+                </Dropzone>
+              </Box>
+            )}
 
             {/* BUTTONS */}
             <Box>
@@ -308,6 +310,24 @@ const Form = () => {
           </DialogActions>
         </Dialog>
       )}
+      <Dialog open={loginError} onClose={handleClose}>
+        <DialogTitle sx={{ color: "red" }}>Login Error</DialogTitle>
+        <DialogContent>
+          <p>Reason: {loginError}</p>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Close</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={registerError} onClose={handleClose}>
+        <DialogTitle sx={{ color: "red" }}>Register Error</DialogTitle>
+        <DialogContent>
+          <p>Reason: {registerError}</p>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

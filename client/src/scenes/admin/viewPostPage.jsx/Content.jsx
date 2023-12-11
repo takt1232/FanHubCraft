@@ -25,6 +25,8 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state";
 import { useNavigate, useParams } from "react-router-dom";
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 
 const AdminViewPostContent = () => {
   const isNonMobileScreens = useMediaQuery("(min-width: 900px");
@@ -34,6 +36,7 @@ const AdminViewPostContent = () => {
 
   const [isComments, setIsComments] = useState(false);
   const [reviewUsers, setReviewUsers] = useState({});
+  const [averageRating, setAverageRating] = useState(null);
   const [commentUsers, setCommentUsers] = useState({});
 
   const dispatch = useDispatch();
@@ -64,6 +67,26 @@ const AdminViewPostContent = () => {
   const [allReviewsLoaded, setAllReviewsLoaded] = useState(false);
 
   const [fetchStatus, setFetchStatus] = useState(null);
+
+  const [open, setOpen] = useState(false);
+
+  const openLightbox = () => {
+    setOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setOpen(false);
+  };
+
+  const slides = [
+    {
+      src: `http://localhost:3001/assets/${postData.postPicturePath}`,
+      alt: "user",
+      width: 3840,
+      height: 2560,
+    },
+    // Add more slides if you have multiple images
+  ];
 
   const loadMoreReviews = () => {
     const remainingReviews = reviewUsers.length - visibleReviews;
@@ -366,10 +389,38 @@ const AdminViewPostContent = () => {
     window.location.reload();
   };
 
+  const calculateAverageRating = () => {
+    if (reviewUsers.length === 0) {
+      return 0;
+    }
+
+    let totalRatings = 0;
+    if (reviewUsers.length > 0) {
+      reviewUsers.forEach((review) => {
+        totalRatings += review.rating;
+      });
+    }
+
+    const average = (totalRatings / reviewUsers.length).toFixed(1); // Round to one decimal point
+    const parsedAverage = parseFloat(average);
+
+    // Check if parsedAverage is NaN, if so, set averageRating to 0
+    if (isNaN(parsedAverage)) {
+      setAverageRating(0);
+    } else {
+      setAverageRating(parsedAverage);
+    }
+  };
+
   useEffect(() => {
     fetchPostAndUser();
     getReviewForPost();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    calculateAverageRating();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reviewUsers]);
 
   return (
     <>
@@ -436,8 +487,10 @@ const AdminViewPostContent = () => {
                     width: "100%",
                     height: "100%",
                     objectFit: "contain",
+                    cursor: "pointer",
                   }}
                   src={`http://localhost:3001/assets/${postData.postPicturePath}`}
+                  onClick={openLightbox}
                 />
               </Box>
             )}
@@ -449,7 +502,7 @@ const AdminViewPostContent = () => {
                   <IconButton onClick={handleToggleReviews}>
                     <StarIcon color="primary" />
                   </IconButton>
-                  <Typography>{reviewUsers.length}</Typography>
+                  {averageRating && <Typography>{averageRating}</Typography>}
                 </FlexBetween>
                 <FlexBetween gap="0.3rem">
                   <IconButton onClick={handleToggleComments}>
@@ -683,6 +736,16 @@ const AdminViewPostContent = () => {
             handleClose={handleCloseDialog}
             title="Comment"
             content="Please add a comment"
+          />
+          <Lightbox
+            open={open}
+            close={closeLightbox}
+            carousel={{ finite: slides.length <= 1 }}
+            render={{
+              buttonPrev: slides.length <= 1 ? () => null : undefined,
+              buttonNext: slides.length <= 1 ? () => null : undefined,
+            }}
+            slides={slides}
           />
         </Box>
       )}

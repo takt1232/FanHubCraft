@@ -46,8 +46,8 @@ const EditPostWidget = ({ postId }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
-      setPostData(data[0]);
-      setPostEdit(data[0].description);
+      setPostData(data);
+      setPostEdit(data.description);
       setLoadingAnimation(false); // Stop the loading animation
     } catch (error) {
       console.error("Error fetching post:", error);
@@ -138,6 +138,7 @@ const EditPostWidget = ({ postId }) => {
 
   const handleClosePostSuccessDialog = () => {
     setIsPostSuccessDialogOpen(false);
+    window.location.reload();
   };
 
   useEffect(() => {

@@ -29,12 +29,14 @@ import { useNavigate } from "react-router-dom";
 
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
+import Friend from "components/Friend";
 
 const PostWidget = ({ postId }) => {
   const [postData, setPostData] = useState({});
 
   const [isComments, setIsComments] = useState(false);
   const [reviewUsers, setReviewUsers] = useState({});
+  const [averageRating, setAverageRating] = useState(null);
   const [commentUsers, setCommentUsers] = useState({});
 
   const dispatch = useDispatch();
@@ -86,7 +88,7 @@ const PostWidget = ({ postId }) => {
 
   const slides = [
     {
-      src: `http://localhost:3001/assets/${postData.postPicturePath}`,
+      src: `http://localhost:3001/assets/${postData?.postPicturePath}`,
       alt: "user",
       width: 3840,
       height: 2560,
@@ -555,17 +557,45 @@ const PostWidget = ({ postId }) => {
     setOpenDeleteReview(true);
   };
 
+  const calculateAverageRating = () => {
+    if (reviewUsers.length === 0) {
+      return 0;
+    }
+
+    let totalRatings = 0;
+    if (reviewUsers.length > 0) {
+      reviewUsers.forEach((review) => {
+        totalRatings += review.rating;
+      });
+    }
+
+    const average = (totalRatings / reviewUsers.length).toFixed(1); // Round to one decimal point
+    const parsedAverage = parseFloat(average);
+
+    // Check if parsedAverage is NaN, if so, set averageRating to 0
+    if (isNaN(parsedAverage)) {
+      setAverageRating(0);
+    } else {
+      setAverageRating(parsedAverage);
+    }
+  };
+
   useEffect(() => {
     fetchPostAndUser();
     getReviewForPost();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    calculateAverageRating();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reviewUsers]);
 
   return (
     <>
       <Box display="flex" flexDirection="column" gap="0.5rem" padding="1rem">
         <WidgetWrapper>
           {postData && (
-            <FriendAdmin
+            <Friend
               friendId={postData.userId}
               name={postData.name}
               subtitle={postData.location}
@@ -603,7 +633,7 @@ const PostWidget = ({ postId }) => {
                   objectFit: "contain",
                   cursor: "pointer",
                 }}
-                src={`http://localhost:3001/assets/${postData.postPicturePath}`}
+                src={`http://localhost:3001/assets/${postData?.postPicturePath}`}
                 onClick={openLightbox}
               />
             </Box>
@@ -614,7 +644,7 @@ const PostWidget = ({ postId }) => {
                 <IconButton onClick={handleToggleReviews}>
                   <StarIcon color="primary" />
                 </IconButton>
-                <Typography>{reviewUsers.length}</Typography>
+                {averageRating && <Typography>{averageRating}</Typography>}
               </FlexBetween>
               <FlexBetween gap="0.3rem">
                 <IconButton onClick={handleToggleComments}>

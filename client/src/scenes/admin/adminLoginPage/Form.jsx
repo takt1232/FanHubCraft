@@ -47,7 +47,7 @@ const AdminLoginForm = () => {
         dispatch(setRole({ role: loggedIn.role }));
         navigate("/admin/home");
       } else {
-        setLoginError("Account Not Admin"); // Set login error message
+        setLoginError(loggedIn.msg); // Set login error message
       }
     }
   };

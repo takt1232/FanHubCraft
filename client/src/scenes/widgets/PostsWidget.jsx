@@ -40,8 +40,8 @@ const PostsWidget = ({ userId, isProfile = false }) => {
   return (
     <>
       {posts &&
-        posts.map &&
-        posts.map(({ _id }) => <PostWidget key={_id} postId={_id} />)}
+        posts?.map &&
+        posts?.map(({ _id }) => <PostWidget key={_id} postId={_id} />)}
     </>
   );
 };
